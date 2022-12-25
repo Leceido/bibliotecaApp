@@ -1,0 +1,19 @@
+<h2>Livros de {{usuario.nome}}</h2>
+
+{{#each retirados}}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>{{livro.nome}}</h4>
+            <p>Sinopse: {{livro.sinopse}}</p>
+            <small>Generos: {{livro.genero}}</small><br>
+            <small>Previsao de entrega: {{entrega}}</small>
+            <form action="/admin/livro/devolver" method="post">
+                <input type="hidden" name="id" value="{{_id}}">
+                <input type="hidden" name="livro" value="{{livro._id}}">
+                <button type="submit" class="btn btn-success mt-2">Devolver Livro</button>
+            </form>
+        </div>
+    </div>
+{{else}}
+    <p>Nenhum livro retirado!</p>
+{{/each}}

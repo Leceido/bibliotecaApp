@@ -1,0 +1,37 @@
+<h2>{{usuario.nome}}</h2>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h4>Email: {{usuario.email}}</h4>
+        <p>Livros retirados: {{retiradoscount}}</p>
+        <a href="/usuarios/edit/{{usuario._id}}"><button class="btn btn-primary">Editar Conta</button></a>
+    </div>
+</div>
+
+<hr>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+      {{#each retirados}}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="centralizar-img">
+                        <img src="/img/{{livro.slug}}.webp" class="card-img-top imgs" alt="...">
+                    </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{livro.nome}}</h5>
+                            <div class="sinopse-card">
+                                <p class="">{{sinopse}}</p>
+                            </div>
+                            <form action="/livro/devolver" method="post">
+                                <input type="hidden" name="id" value="{{_id}}">
+                                <input type="hidden" name="livro" value="{{livro._id}}">
+                                <input type="hidden" name="pessoa" value="{{pessoa._id}}">
+                                <button type="submit" class="btn btn-success mt-2">Devolver Livro</button>
+                            </form>
+                        </div>
+                </div>
+            </div>
+      {{else}}
+
+      {{/each}}
+  </div>

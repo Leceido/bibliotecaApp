@@ -1,0 +1,19 @@
+<h2>Livros cadastrados: </h2>
+<br>
+<a href="/admin/livro/cadastrar"><button class="btn btn-primary">Cadastrar Livro</button></a>
+
+{{#each livros}}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>{{nome}}</h4>
+            <p>Sinopse: {{sinopse}}</p>
+            <small>Slug: {{slug}}</small><br>
+            <small>Data: {{data}}</small><br>
+            <small>Categoria: {{genero}} </small><br>
+            <a href="/admin/livro/edit/{{_id}}"><button class="btn btn-primary mt-2">Editar Livro</button></a>
+            <a href="/admin/livro/deletar/{{_id}}"><button class="btn btn-danger mt-2">Deletar Livro</button></a>
+        </div>
+    </div>
+{{else}}
+    <p>Nenhum livro cadastrado!</p>
+{{/each}}

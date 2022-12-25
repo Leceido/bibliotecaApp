@@ -1,0 +1,78 @@
+{{#if user}}
+  <div class="bg-light p-5 rounded-lg m-3">
+    <h1 class="display-4">Bem vindo ao BibliotecaApp</h1>
+    <p class="lead">Este eh um site simples, desenvolvido com Node.js + Express + MongoDB</p>
+    <hr class="my-4">
+    <p>Site desenvolvido apenas para testes.</p>
+  </div>
+
+  <hr>
+
+  <h4>Livro recentes:</h4>
+
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+      {{#each livros}}
+        <div class="col">
+          <div class="card h-100">
+            <div class="centralizar-img">
+              <img src="/img/{{slug}}.webp" class="card-img-top imgs" alt="...">
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">{{nome}}</h5>
+              <div class="sinopse-card">
+                <p class="">{{sinopse}}</p>
+              </div>
+              <small>Genero: {{genero}}</small><br>
+              {{#if disponibilidade}}
+                <small style="font-weight: bold;">Livro disponivel para retirada</small>
+              {{else}}
+                <small style="font-weight: bold;">Livro ja retirado</small>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      {{else}}
+
+      {{/each}}
+  </div>
+{{else}}
+  <div class="bg-light p-5 rounded-lg m-3">
+    <h1 class="display-4">Bem vindo ao BibliotecaApp</h1>
+    <p class="lead">Este eh um site simples, desenvolvido com Node.js + Express + MongoDB</p>
+    <hr class="my-4">
+    <p>Site desenvolvido apenas para testes.</p>
+    <a href="/usuario/registro"><button class="btn btn-primary">Criar Conta</button></a>
+  </div>
+
+  <hr>
+    
+    <h4>Livro recentes:</h4>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {{#each livros}}
+          <div class="col">
+            <div class="card h-100">
+              <div class="centralizar-img">
+                <img src="/img/{{slug}}.webp" class="card-img-top imgs" alt="...">
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">{{nome}}</h5>
+                <p class="card-text">{{sinopse}}</p>
+                <small>Genero: {{genero}}</small><br>
+                {{#if disponibilidade}}
+                  <small style="font-weight: bold;">Livro disponivel para retirada</small>
+                {{else}}
+                  <small style="font-weight: bold;">Livro ja retirado</small>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+        {{else}}
+
+        {{/each}}
+    </div>
+{{/if}}
+
+
+
+
+

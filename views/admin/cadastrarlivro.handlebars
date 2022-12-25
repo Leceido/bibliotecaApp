@@ -1,0 +1,33 @@
+{{#each erros}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
+<h3>Novo livro: </h3>
+<div class="card">
+    <div class="card-body">
+        <form action="/admin/livro/novo/" method="post">
+            <label for="nome">Nome do livro: </label>
+                <input type="text" name="nome" id="nome" class="form-control">
+            <label for="slug">Slug: </label>
+                <input type="text" name="slug" id="slug" class="form-control">
+            <br>
+            <p>Genero: </p>
+                {{#each generos}}
+                    <div class="form-check">
+                        <label class="form-check-label" for="categoria">{{nome}}</label>
+                        <input class="form-check-input" type="checkbox" name="categoria" id="{{slug}}" value="{{nome}}">
+                    </div>
+                {{else}}
+                    <div class="form-check">
+                        <label class="form-check-label" for="undefined">Undefined</label>
+                        <input class="form-check-input" type="checkbox" name="" id="" value="" checked disabled>
+                    </div>
+                {{/each}}
+            <label for="sinopse">Sinopse: </label>
+            <textarea name="sinopse" class="form-control"></textarea>
+            <br><button type="submit" class="btn btn-success">Adicionar livro</button>
+        </form>
+    </div>
+</div>

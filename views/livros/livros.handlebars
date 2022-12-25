@@ -1,0 +1,30 @@
+<h4>Livros: </h4>
+
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {{#each livros}}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="centralizar-img">
+                        <img src="/img/{{slug}}.webp" class="card-img-top imgs" alt="...">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{nome}}</h5>
+                        <p class="card-text">{{sinopse}}</p>
+                        <hr>
+                        <small>Genero: {{genero}}</small><br>
+                        
+                        {{#if disponibilidade}}
+                            <a href="/livro/retirada/{{_id}}"><button class="btn btn-primary">Pegar Livro</button></a>
+                        {{else}}
+                            <small style="font-weight: bold;">Livro ja retirado</small>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        {{else}}
+
+        {{/each}}
+    </div>
+
+

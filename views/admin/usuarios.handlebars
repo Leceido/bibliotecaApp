@@ -1,0 +1,15 @@
+<h1>Usuarios</h1>
+
+{{#each usuarios}}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h3><a href="/admin/usuarios/{{_id}}">{{nome}}</a></h3>
+            <small>Email: {{email}}</small><br>
+            <small>Admin: {{isAdmin}}</small><br>
+            <small>Funcionario: {{isFuncionario}}</small><br>
+            <a href="/admin/usuarios/deletar/{{_id}}"><button class="btn btn-danger mt-2">Deletar usuario</button></a>
+        </div>
+    </div>
+{{else}}
+
+{{/each}}

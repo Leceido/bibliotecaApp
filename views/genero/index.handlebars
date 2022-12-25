@@ -1,0 +1,12 @@
+<h4>Generos: </h4>
+<hr>
+
+{{#each generos}}
+    <div class="card mt-2">
+        <div class="card-body">
+            <a href="/genero/{{slug}}"><p>{{nome}}</p></a>
+        </div>
+    </div>
+{{else}}
+    <p>Nenhum genero de livro registrado!</p>
+{{/each}}

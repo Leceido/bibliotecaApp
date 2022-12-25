@@ -1,0 +1,17 @@
+<h2>Funcionarios</h2>
+
+<a href="/admin/funcionarios/cadastrar"><button class="btn btn-primary">Cadastrar funcionario</button></a>
+
+{{#each funcionarios}}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>{{nome}}</h4>
+            <small>Email: {{email}}</small><br>
+            <small>Admin: {{isAdmin}}</small><br>
+            <a href="/admin/funcionarios/edit/{{_id}}"><button class="btn btn-primary mt-2">Editar usuario</button></a>
+            <a href="/admin/funcionarios/deletar/{{_id}}"><button class="btn btn-danger mt-2">Deletar usuario</button></a>
+        </div>
+    </div>
+{{else}}
+    <h4>Nenhum funcionario cadastrado</h4>
+{{/each}}
