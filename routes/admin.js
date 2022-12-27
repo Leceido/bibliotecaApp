@@ -12,6 +12,19 @@ require('../models/Retirado')
 const Retirada = mongoose.model('retirados')
 const {eAdmin} = require('../helpers/eAdmin')
 const {eFunc} = require('../helpers/eFunc')
+const multer = require('multer')
+const path = require('path')
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, 'public/img/')
+    },
+    filename: function(req, file, cb) {
+        cb(null, req.body.slug + path.extname(file.originalname))
+    }
+})
+const upload = multer({storage})
+
 
 router.get('/', (eAdmin || eFunc), (req, res) => {
     res.render('../views/admin/index.handlebars')
@@ -119,7 +132,7 @@ router.get('/livro/',   (eAdmin || eFunc), (req, res) => {
     })
 })
 
-router.get('/livro/cadastrar',   (eAdmin || eFunc), (req, res) => {
+router.get('/livro/cadastrar',  (eAdmin || eFunc), (req, res) => {
     Genero.find().then((generos) => {
         res.render('../views/admin/cadastrarlivro.handlebars', {generos: generos})
     }).catch((err) => {
@@ -128,7 +141,7 @@ router.get('/livro/cadastrar',   (eAdmin || eFunc), (req, res) => {
     })
 })
 
-router.post('/livro/novo',   (eAdmin || eFunc), (req, res) => {
+router.post('/livro/novo', upload.single('arquivo'),  (eAdmin || eFunc), (req, res) => {
     let erros = []
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){

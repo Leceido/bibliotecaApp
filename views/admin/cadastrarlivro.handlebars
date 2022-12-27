@@ -7,7 +7,7 @@
 <h3>Novo livro: </h3>
 <div class="card">
     <div class="card-body">
-        <form action="/admin/livro/novo/" method="post">
+        <form action="/admin/livro/novo/" method="post" enctype="multipart/form-data">
             <label for="nome">Nome do livro: </label>
                 <input type="text" name="nome" id="nome" class="form-control">
             <label for="slug">Slug: </label>
@@ -26,7 +26,8 @@
                     </div>
                 {{/each}}
             <label for="sinopse">Sinopse: </label>
-            <textarea name="sinopse" class="form-control"></textarea>
+            <textarea name="sinopse" class="form-control"></textarea><br>
+            <input type="file" name="arquivo" id="" class="form-control">
             <br><button type="submit" class="btn btn-success">Adicionar livro</button>
         </form>
     </div>
