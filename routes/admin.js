@@ -26,231 +26,380 @@ const storage = multer.diskStorage({
 const upload = multer({storage})
 
 
-router.get('/', (eAdmin || eFunc), (req, res) => {
-    res.render('../views/admin/index.handlebars')
-})
-
-router.get('/livro/genero', (eAdmin || eFunc), (req, res) => {
-    Genero.find().sort({date: 'desc'}).then((generos) => {
-        res.render('../views/admin/genero.handlebars', {generos: generos})
-    }).catch((err) => {
-        req.flash('error_msg', "Houve um erro ao listar os generos")
-        res.redirect('/admin')
-    })
-})
-
-router.get('/livro/genero/cadastrar', (eAdmin || eFunc), (req, res) => {
-    res.render('../views/admin/cadastrargenero.handlebars')
-})
-
-router.post('/livro/genero/novo', (eAdmin || eFunc), (req, res) => {
-    let erros = []
-
-    if (!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null) {
-        erros.push({texto: "Nome invalido"})
-    }
-
-    if (!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null) {
-        erros.push({texto: "Slug invalido"})
-    }
-
-    if(erros.length > 0) {
-        res.render('../views/admin/cadastrargenero.handlebars', {erros: erros})
-    } else {
-        const novoGenero = {
-            nome: req.body.nome,
-            slug: req.body.slug,
-        }
-        new Genero(novoGenero).save().then(() => {
-            req.flash('success_msg', "Genero criado com sucesso!")
-            res.redirect('/admin/livro/genero/cadastrar')
-        }).catch((err) => {
-            req.flash('error_msg', "Houve um erro ao salvar o genero, tente novamente!")
-            res.redirect('/admin/livro/')
-        })
-    }
-})
-
-router.get('/livro/genero/edit/:id', (eAdmin || eFunc), (req, res) => {
-    Genero.findOne({_id: req.params.id}).then((genero) => {
-        res.render('../views/admin/editgenero.handlebars', {genero: genero})
-    }).catch((err) => {
-        req.flash('error_msg', "Este genero nao existe")
-        res.redirect('/admin/livro/genero')
-    })
-})
-
-router.post('/livro/genero/edit',   (eAdmin || eFunc), (req, res) => {
-    
-    let erros = []
-
-    if (!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null) {
-        erros.push({texto: "Nome invalido"})
-    }
-
-    if (!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null) {
-        erros.push({texto: "Slug invalido"})
-    }
-
-    Genero.findOne({_id: req.body.id}).then((genero) => {
-        if(erros.length > 0) {
-            res.render('../views/admin/editgenero.handlebars', {genero: genero, erros: erros})
+router.get('/', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            res.render('../views/admin/index.handlebars')
         } else {
-            genero.nome = req.body.nome
-            genero.slug = req.body.slug
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+})
 
-            genero.save().then(() => {
-                req.flash('success_msg', "Genero editado com sucesso")
-                res.redirect('/admin/livro/genero')
+router.get('/livro/genero', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Genero.find().sort({date: 'desc'}).then((generos) => {
+                res.render('../views/admin/genero.handlebars', {generos: generos})
             }).catch((err) => {
-                req.flash('error_msg', "Erro ao tentar editar o genero, tente novamente!")
+                req.flash('error_msg', "Houve um erro ao listar os generos")
+                res.redirect('/admin')
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
+
+router.get('/livro/genero/cadastrar', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            res.render('../views/admin/cadastrargenero.handlebars')
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+})
+
+router.post('/livro/genero/novo', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            let erros = []
+
+            if (!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null) {
+                erros.push({texto: "Nome invalido"})
+            }
+
+            if (!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null) {
+                erros.push({texto: "Slug invalido"})
+            }
+
+            if(erros.length > 0) {
+                res.render('../views/admin/cadastrargenero.handlebars', {erros: erros})
+            } else {
+                const novoGenero = {
+                    nome: req.body.nome,
+                    slug: req.body.slug,
+                }
+                new Genero(novoGenero).save().then(() => {
+                    req.flash('success_msg', "Genero criado com sucesso!")
+                    res.redirect('/admin/livro/genero/cadastrar')
+                }).catch((err) => {
+                    req.flash('error_msg', "Houve um erro ao salvar o genero, tente novamente!")
+                    res.redirect('/admin/livro/')
+                })
+            }
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+    
+})
+
+router.get('/livro/genero/edit/:id', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Genero.findOne({_id: req.params.id}).then((genero) => {
+                res.render('../views/admin/editgenero.handlebars', {genero: genero})
+            }).catch((err) => {
+                req.flash('error_msg', "Este genero nao existe")
                 res.redirect('/admin/livro/genero')
             })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
         }
-    }).catch((err) => {
-        req.flash('error_msg', "Houve um erro ao selecionar a categoria")
-        res.redirect('/admin/livro/genero')
-    })
-})
-
-router.post('/livro/genero/deletar',   (eAdmin || eFunc), (req, res) => {
-    Genero.deleteOne({_id: req.body.id}).then(() => {
-        req.flash("success_msg", "Genero deletado com sucesso")
-        res.redirect('/admin/livro/genero')
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao deletar o genero!")
-        res.redirect('/admin/livro/genero')
-    })
-})
-
-router.get('/livro/',   (eAdmin || eFunc), (req, res) => {
-    Livro.find().lean().populate('genero').sort({data: "desc"}).then((livros, generos) => {
-        res.render('../views/admin/livros.handlebars', {livros: livros, generos: generos})
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao listar os livros")
-        res.redirect('/admin')
-    })
-})
-
-router.get('/livro/cadastrar',  (eAdmin || eFunc), (req, res) => {
-    Genero.find().then((generos) => {
-        res.render('../views/admin/cadastrarlivro.handlebars', {generos: generos})
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao carregar o formulario")
-        res.redirect("/livro/")
-    })
-})
-
-router.post('/livro/novo', upload.single('arquivo'),  (eAdmin || eFunc), (req, res) => {
-    let erros = []
-
-    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Titulo invalido"})
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
     }
-    if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null){
-        erros.push({texto: "Slug invalido"})
-    }
-    if(req.body.categoria == 0) {
-        erros.push({texto: "Selecione algum genero!"})
+})
+
+router.post('/livro/genero/edit', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            let erros = []
+
+            if (!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null) {
+                erros.push({texto: "Nome invalido"})
+            }
+
+            if (!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null) {
+                erros.push({texto: "Slug invalido"})
+            }
+
+            Genero.findOne({_id: req.body.id}).then((genero) => {
+                if(erros.length > 0) {
+                    res.render('../views/admin/editgenero.handlebars', {genero: genero, erros: erros})
+                } else {
+                    genero.nome = req.body.nome
+                    genero.slug = req.body.slug
+
+                    genero.save().then(() => {
+                        req.flash('success_msg', "Genero editado com sucesso")
+                        res.redirect('/admin/livro/genero')
+                    }).catch((err) => {
+                        req.flash('error_msg', "Erro ao tentar editar o genero, tente novamente!")
+                        res.redirect('/admin/livro/genero')
+                    })
+                }
+            }).catch((err) => {
+                req.flash('error_msg', "Houve um erro ao selecionar a categoria")
+                res.redirect('/admin/livro/genero')
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
     }
     
-    if(erros.length > 0) {
-        Genero.find().then((generos) => {
-            res.render('../views/admin/cadastrarlivro.handlebars', {generos: generos, erros: erros})
-        }).catch((err) => {
-            req.flash("error_msg", "Houve um erro ao carregar o formulario")
-            res.redirect("/admin/livro")
-        })
-    } else { 
-        const novoLivro = {
-            nome: req.body.nome,
-            slug: req.body.slug,
-            genero: req.body.categoria,
-            sinopse: req.body.sinopse,
+})
+
+router.post('/livro/genero/deletar', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Genero.deleteOne({_id: req.body.id}).then(() => {
+                req.flash("success_msg", "Genero deletado com sucesso")
+                res.redirect('/admin/livro/genero')
+            }).catch((err) => {
+                req.flash("error_msg", "Houve um erro ao deletar o genero!")
+                res.redirect('/admin/livro/genero')
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
         }
-
-        new Livro(novoLivro).save().then(() => {
-            req.flash("success_msg", 'Livro cadastrado com sucesso!')
-            res.redirect('/admin/livro')
-        }).catch((err) => {
-            req.flash("error_msg", "Houve um erro durante o salvamento do livro")
-            res.redirect('/admin/livro')
-        })
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
     }
 })
 
-router.get("/livro/edit/:id",   (eAdmin || eFunc), (req ,res) => {
-    Livro.findOne({_id: req.params.id}).then((livros) => {
-        Genero.find().then((generos) => {
-            res.render('../views/admin/editlivro.handlebars', {livros: livros, generos: generos})
-        }).catch((err) => {
-            req.flash("error_msg", "Houve um erro ao listar os generos")
-            res.redirect("/admin/livros")
-        })
-
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao carregar o formulario de edicao")
-    })
+router.get('/livro/', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Livro.find().lean().populate('genero').sort({data: "desc"}).then((livros, generos) => {
+                res.render('../views/admin/livros.handlebars', {livros: livros, generos: generos})
+            }).catch((err) => {
+                req.flash("error_msg", "Houve um erro ao listar os livros")
+                res.redirect('/admin')
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
 })
 
-router.post('/livro/edit' ,   (eAdmin || eFunc), (req, res) => {
-    let erros = []
+router.get('/livro/cadastrar', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Genero.find().then((generos) => {
+                res.render('../views/admin/cadastrarlivro.handlebars', {generos: generos})
+            }).catch((err) => {
+                req.flash("error_msg", "Houve um erro ao carregar o formulario")
+                res.redirect("/livro/")
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
 
-    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Titulo invalido"})
-    }
-    if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null){
-        erros.push({texto: "Slug invalido"})
-    }
-    if(req.body.categoria == 0) {
-        erros.push({texto: "Selecione algum genero!"})
-    }
-    if(erros.length > 0) {
-        Genero.find().then((generos) => {
-            res.render('../views/admin/cadastrarlivro.handlebars', {generos: generos, erros: erros})
-        }).catch((err) => {
-            req.flash("error_msg", "Houve um erro ao carregar o formulario")
-            res.redirect("/admin/livro")
-        })
-    } else { 
-        Livro.findOne({_id: req.body.id}).then((livro) => {
-            livro.nome = req.body.nome
-            livro.slug = req.body.slug
-            livro.genero = req.body.categoria
-            livro.sinopse = req.body.sinopse
+router.post('/livro/novo', upload.single('arquivo'), (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            let erros = []
 
-            livro.save().then(() => {
-                req.flash("success_msg", "Livro editado com sucesso!")
+            if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+                erros.push({texto: "Titulo invalido"})
+            }
+            if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null){
+                erros.push({texto: "Slug invalido"})
+            }
+            if(req.body.categoria == 0) {
+                erros.push({texto: "Selecione algum genero!"})
+            }
+            
+            if(erros.length > 0) {
+                Genero.find().then((generos) => {
+                    res.render('../views/admin/cadastrarlivro.handlebars', {generos: generos, erros: erros})
+                }).catch((err) => {
+                    req.flash("error_msg", "Houve um erro ao carregar o formulario")
+                    res.redirect("/admin/livro")
+                })
+            } else { 
+                const novoLivro = {
+                    nome: req.body.nome,
+                    slug: req.body.slug,
+                    genero: req.body.categoria,
+                    sinopse: req.body.sinopse,
+                }
+
+                new Livro(novoLivro).save().then(() => {
+                    req.flash("success_msg", 'Livro cadastrado com sucesso!')
+                    res.redirect('/admin/livro')
+                }).catch((err) => {
+                    req.flash("error_msg", "Houve um erro durante o salvamento do livro")
+                    res.redirect('/admin/livro')
+                })
+            }
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
+
+router.get("/livro/edit/:id", (req ,res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Livro.findOne({_id: req.params.id}).then((livros) => {
+                Genero.find().then((generos) => {
+                    res.render('../views/admin/editlivro.handlebars', {livros: livros, generos: generos})
+                }).catch((err) => {
+                    req.flash("error_msg", "Houve um erro ao listar os generos")
+                    res.redirect("/admin/livros")
+                })
+        
+            }).catch((err) => {
+                req.flash("error_msg", "Houve um erro ao carregar o formulario de edicao")
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
+
+router.post('/livro/edit' , (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            let erros = []
+
+            if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+                erros.push({texto: "Titulo invalido"})
+            }
+            if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null){
+                erros.push({texto: "Slug invalido"})
+            }
+            if(req.body.categoria == 0) {
+                erros.push({texto: "Selecione algum genero!"})
+            }
+            if(erros.length > 0) {
+                Genero.find().then((generos) => {
+                    res.render('../views/admin/cadastrarlivro.handlebars', {generos: generos, erros: erros})
+                }).catch((err) => {
+                    req.flash("error_msg", "Houve um erro ao carregar o formulario")
+                    res.redirect("/admin/livro")
+                })
+            } else { 
+                Livro.findOne({_id: req.body.id}).then((livro) => {
+                    livro.nome = req.body.nome
+                    livro.slug = req.body.slug
+                    livro.genero = req.body.categoria
+                    livro.sinopse = req.body.sinopse
+
+                    livro.save().then(() => {
+                        req.flash("success_msg", "Livro editado com sucesso!")
+                        res.redirect('/admin/livro')
+                    }).catch((err) => {
+                        req.flash("error_msg", "Houve um erro ao tentar salvar a edicao")
+                        res.redirect("/admin/livro")
+                    })
+                }).catch((err) => {
+                    req.flash("error_msg", "Houve um erro ao tentar editar")
+                    res.redirect("/admin/livro")
+                })
+            }
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+})
+
+router.get('/livro/deletar/:id', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Livro.deleteOne({_id: req.params.id}).then(() => {
+                req.flash("success_msg", "Livro deletado com sucesso!")
                 res.redirect('/admin/livro')
             }).catch((err) => {
-                req.flash("error_msg", "Houve um erro ao tentar salvar a edicao")
-                res.redirect("/admin/livro")
+                req.flash("error_msg", "Houve um erro interno")
+                res.redirect('/admin/livro')
             })
-        }).catch((err) => {
-            req.flash("error_msg", "Houve um erro ao tentar editar")
-            res.redirect("/admin/livro")
-        })
-    }
-})
-
-router.get('/livro/deletar/:id',   (eAdmin || eFunc), (req, res) => {
-    Livro.deleteOne({_id: req.params.id}).then(() => {
-        req.flash("success_msg", "Livro deletado com sucesso!")
-        res.redirect('/admin/livro')
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro interno")
-        res.redirect('/admin/livro')
-    })
-})
-
-router.get('/livro/genero/:slug',   (eAdmin || eFunc), (req, res) => {
-    Genero.findOne({slug: req.params.slug}).then((genero) => {
-        if(genero){
-            Livro.find({genero: genero.nome}).then((livros) => {
-                res.render("../views/admin/buscaporgenero.handlebars", {livros: livros, genero: genero})
-            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
         }
-    })
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
+
+router.get('/livro/genero/:slug', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Genero.findOne({slug: req.params.slug}).then((genero) => {
+                if(genero){
+                    Livro.find({genero: genero.nome}).then((livros) => {
+                        res.render("../views/admin/buscaporgenero.handlebars", {livros: livros, genero: genero})
+                    })
+                }
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
 })
 
 router.get('/funcionarios', eAdmin, (req, res) => {
@@ -400,124 +549,189 @@ router.get('/funcionarios/deletar/:id', eAdmin, (req, res) => {
     })
 })
 
-router.get('/livro/retirado',   (eAdmin || eFunc), (req, res) => {
-    Retirada.find().lean().populate('livro').populate('pessoa').sort({data: 'desc'}).then((retirados) => {
-        res.render('../views/admin/livrosretirados.handlebars', {retirados: retirados})
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao tentar carregar os livros retirados!")
-        res.redirect('/admin')
-        console.log(err);
-    })
-})
-
-router.get('/livro/retirado/registrar',  (eAdmin || eFunc), (req, res) => {
-    Livro.find({disponibilidade: true}).then((livros) => {
-        User.find({nivelPermissao: 0, isFuncionario: false, isAdmin: false}).then((usuarios) => {
-            res.render('../views/admin/registrarretirada.handlebars', {livros: livros, usuarios: usuarios})
-        }).catch((err) => {
-            req.flash("error_msg", "Houve um erro ao carregar os usuarios!")
-            res.redirect('/admin')
-        })
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao carregar os livros!")
-        res.redirect('/admin')
-    })
-})
-
-router.post('/livro/retirar',  (eAdmin || eFunc), (req, res) => {
-    let erros = []
-
-    if(req.body.livro == 0) {
-        erros.push({texto: "Livro invalido, cadastre um livro antes!"})
-    }
-
-    if(req.body.pessoa == 0) {
-        erros.push({texto: "Usuario invalido, cadastre um usuario antes!"})
-    }
-
-    if (erros.length > 0) {
-        Livro.find({disponibilidade: true}).then((livros) => {
-            User.find({nivelPermissao: 0, isFuncionario: false, isAdmin: false}).then((usuarios) => {
-                res.render('../views/admin/registrarretirada.handlebars', {livros: livros, usuarios: usuarios, erros: erros})
+router.get('/livro/retirado', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Retirada.find().lean().populate('livro').populate('pessoa').sort({data: 'desc'}).then((retirados) => {
+                res.render('../views/admin/livrosretirados.handlebars', {retirados: retirados})
             }).catch((err) => {
-                req.flash("error_msg", "Houve um erro ao carregar os usuarios!")
+                req.flash("error_msg", "Houve um erro ao tentar carregar os livros retirados!")
                 res.redirect('/admin')
+                console.log(err);
             })
-        }).catch((err) => {
-            req.flash("error_msg", "Houve um erro ao carregar os livros!")
-            res.redirect('/admin')
-        })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
     } else {
-        Livro.findOne({_id: req.body.livro}).then((livro) => {
-            livro.disponibilidade = false
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+})
 
-            livro.save().then(() => {
-                const novaRetirada = {
-                    pessoa: req.body.pessoa,
-                    livro: req.body.livro,
-                    entrega: req.body.entrega
-                }
-
-                new Retirada(novaRetirada).save().then(() => {
-                    req.flash("success_msg", "Retirada registrada com sucesso!")
-                    res.redirect('/admin/livro/retirado')
+router.get('/livro/retirado/registrar', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Livro.find({disponibilidade: true}).then((livros) => {
+                User.find({nivelPermissao: 0, isFuncionario: false, isAdmin: false}).then((usuarios) => {
+                    res.render('../views/admin/registrarretirada.handlebars', {livros: livros, usuarios: usuarios})
                 }).catch((err) => {
-                    req.flash("error_msg", "Houve um erro ao tentar registrar uma retirada!")
-                    res.redirect('/admin/livro/retirada')
+                    req.flash("error_msg", "Houve um erro ao carregar os usuarios!")
+                    res.redirect('/admin')
                 })
             }).catch((err) => {
-                req.flash("error_msg", "Houve um erro ao tentar alterar a disponibilidade do livro!")
-                res.redirect('/admin/livro/retirado')
+                req.flash("error_msg", "Houve um erro ao carregar os livros!")
+                res.redirect('/admin')
             })
-        }).catch((err) => {
-            req.flash("error_msg", "Houve um erro ao tentar encontrar o livro na base de dados!")
-            res.redirect('/admin/livro/retirado')
-        })
-    }
-})
-
-router.post('/livro/devolver/',  (eAdmin || eFunc), (req, res) => {
-    Livro.findOne({_id: req.body.livro}).then((livro) => {
-        livro.disponibilidade = true
-
-        livro.save().then(() => {
-            Retirada.deleteOne({_id: req.body.id}).then(() => {
-                req.flash("success_msg", "Livro devolvido com sucesso!")
-                res.redirect('/admin/livro/retirado')
-            }).catch((err) => {
-                req.flash("error_msg", "Nao foi possivel devolver o livro!")
-                res.redirect('/admin/livro/retirado')
-            })
-        })
-
-        
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao tentar encontrar o livro na base de dados!")
-        res.redirect('/admin/livro/retirado')
-    })
-})
-
-router.get('/usuarios',  (eAdmin || eFunc), (req, res) => {
-    User.find({nivelPermissao: 0, isAdmin: false, isFuncionario: false}).then((usuarios) => {
-        res.render('../views/admin/usuarios.handlebars', {usuarios: usuarios})
-    })
-})
-
-router.get('/usuarios/:id',  (eAdmin || eFunc), (req, res) => {
-    User.findOne({_id: req.params.id}).then((usuario) => {
-        if(usuario) {
-            Retirada.find({pessoa: req.params.id}).lean().populate('livro').populate('pessoa').sort({data: 'desc'}).then((retirados) => {
-                res.render('../views/admin/usuariosretirados.handlebars', {retirados: retirados, usuario: usuario})
-            }).catch((err) => {
-                req.flash("error_msg", "Houve um erro ao tentar listar os livros retirados")
-                res.redirect('/admin/livro/retirado')
-            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
         }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
+
+router.post('/livro/retirar', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            let erros = []
+
+            if(req.body.livro == 0) {
+                erros.push({texto: "Livro invalido, cadastre um livro antes!"})
+            }
+
+            if(req.body.pessoa == 0) {
+                erros.push({texto: "Usuario invalido, cadastre um usuario antes!"})
+            }
+
+            if (erros.length > 0) {
+                Livro.find({disponibilidade: true}).then((livros) => {
+                    User.find({nivelPermissao: 0, isFuncionario: false, isAdmin: false}).then((usuarios) => {
+                        res.render('../views/admin/registrarretirada.handlebars', {livros: livros, usuarios: usuarios, erros: erros})
+                    }).catch((err) => {
+                        req.flash("error_msg", "Houve um erro ao carregar os usuarios!")
+                        res.redirect('/admin')
+                    })
+                }).catch((err) => {
+                    req.flash("error_msg", "Houve um erro ao carregar os livros!")
+                    res.redirect('/admin')
+                })
+            } else {
+                Livro.findOne({_id: req.body.livro}).then((livro) => {
+                    livro.disponibilidade = false
+
+                    livro.save().then(() => {
+                        const novaRetirada = {
+                            pessoa: req.body.pessoa,
+                            livro: req.body.livro,
+                            entrega: req.body.entrega
+                        }
+
+                        new Retirada(novaRetirada).save().then(() => {
+                            req.flash("success_msg", "Retirada registrada com sucesso!")
+                            res.redirect('/admin/livro/retirado')
+                        }).catch((err) => {
+                            req.flash("error_msg", "Houve um erro ao tentar registrar uma retirada!")
+                            res.redirect('/admin/livro/retirada')
+                        })
+                    }).catch((err) => {
+                        req.flash("error_msg", "Houve um erro ao tentar alterar a disponibilidade do livro!")
+                        res.redirect('/admin/livro/retirado')
+                    })
+                }).catch((err) => {
+                    req.flash("error_msg", "Houve um erro ao tentar encontrar o livro na base de dados!")
+                    res.redirect('/admin/livro/retirado')
+                })
+            }
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
+
+router.post('/livro/devolver/', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            Livro.findOne({_id: req.body.livro}).then((livro) => {
+                livro.disponibilidade = true
         
-    }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao tentar carregar as informacoes do usuario!")
-        res.redirect('/admin/livro/retirado')
-    })
+                livro.save().then(() => {
+                    Retirada.deleteOne({_id: req.body.id}).then(() => {
+                        req.flash("success_msg", "Livro devolvido com sucesso!")
+                        res.redirect('/admin/livro/retirado')
+                    }).catch((err) => {
+                        req.flash("error_msg", "Nao foi possivel devolver o livro!")
+                        res.redirect('/admin/livro/retirado')
+                    })
+                })
+        
+                
+            }).catch((err) => {
+                req.flash("error_msg", "Houve um erro ao tentar encontrar o livro na base de dados!")
+                res.redirect('/admin/livro/retirado')
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
+
+router.get('/usuarios', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            User.find({nivelPermissao: 0, isAdmin: false, isFuncionario: false}).then((usuarios) => {
+                res.render('../views/admin/usuarios.handlebars', {usuarios: usuarios})
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
+})
+
+router.get('/usuarios/:id', (req, res) => {
+    if(req.user) {
+        if(req.user.isFuncionario || req.user.isAdmin) {
+            User.findOne({_id: req.params.id}).then((usuario) => {
+                if(usuario) {
+                    Retirada.find({pessoa: req.params.id}).lean().populate('livro').populate('pessoa').sort({data: 'desc'}).then((retirados) => {
+                        res.render('../views/admin/usuariosretirados.handlebars', {retirados: retirados, usuario: usuario})
+                    }).catch((err) => {
+                        req.flash("error_msg", "Houve um erro ao tentar listar os livros retirados")
+                        res.redirect('/admin/livro/retirado')
+                    })
+                }
+                
+            }).catch((err) => {
+                req.flash("error_msg", "Houve um erro ao tentar carregar as informacoes do usuario!")
+                res.redirect('/admin/livro/retirado')
+            })
+        } else {
+            req.flash('error_msg', "Necessario permissao para acesso!")
+            res.redirect('/')
+        }
+    } else {
+        req.flash('error_msg', "Necessario login para acesso!")
+        res.redirect('/')
+    }
+    
 })
     
 

@@ -1,0 +1,18 @@
+.nav-color {
+    color: white;
+}
+
+.imgs {
+    max-height: 200px;
+    max-width: 200px;
+    width: auto;
+    height: auto;
+}
+
+.centralizar-img {
+    text-align: center;
+}
+
+.sinopse-card {
+    height: 150;
+}

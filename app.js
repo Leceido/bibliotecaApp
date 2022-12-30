@@ -57,6 +57,8 @@ mongoose.set('strictQuery', false)
     app.set('views', './views');
 
     app.use('/img', express.static(path.join(__dirname, "/public/img")))
+    app.use('/css', express.static(path.join(__dirname, "/public/css")))
+    app.use('/js', express.static(path.join(__dirname, '/public/js')))
 
 //Mongoose
     mongoose.Promise = global.Promise
@@ -68,7 +70,7 @@ mongoose.set('strictQuery', false)
 
 //Rotas
     app.get("/", (req, res) => {
-        Livro.find().populate('genero').sort({data: "desc"}).limit(6).then((livros) => {
+        Livro.find().populate('genero').sort({data: "desc"}).limit(3).then((livros) => {
             res.render('../views/index.handlebars', {livros: livros})
         }).catch((err) => {
             req.flash("error_msg", "Houve um erro interno")
@@ -131,7 +133,10 @@ mongoose.set('strictQuery', false)
 
     app.get('/genero', (req, res) => {
         Genero.find().then((generos) => {
-            res.render('../views/genero/index.handlebars', {generos: generos})
+            Livro.find().then((livros) => {
+                res.render('../views/genero/index.handlebars', {generos: generos, livros: livros})
+            })
+            
         }).catch((err) => {
             req.flash('error_msg', "Houve um erro ao tentar carregar os generos")
             res.redirect('/')
